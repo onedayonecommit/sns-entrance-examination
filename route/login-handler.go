@@ -14,7 +14,7 @@ type loginBody struct{
 // Login handler
 func LoginHandler(res http.ResponseWriter,req *http.Request){
 	if req.Method != "POST" {
-		http.Error(res,"request method is wrong",http.StatusBadRequest)
+		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
 		return
 	}
 
