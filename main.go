@@ -22,6 +22,7 @@ func main(){
 	router.HandleFunc("/v1/user/login",route.LoginHandler)
 	router.HandleFunc("/v1/wallets",route.GetAllWalletHandler)
 	router.HandleFunc("/v1/wallet/balance/{ADDRESS}",route.GetBalanceHandler)
+	router.HandleFunc("/v1/market/convert",route.ExchangeHandler)
 	
 	err:= http.ListenAndServe(":3000",router)
 	if err != nil{
