@@ -40,7 +40,14 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 
-		err = tx.Create(&model.User{Email: s.Email, Password: s.Password, FullName: s.Fullname}).Error
+		hashPw,err := util.GenerateHashPw(s.Password)
+		if err != nil{
+			fmt.Println("password hashing failed")
+			http.Error(res,"password hasing is failed",http.StatusInternalServerError)
+			return
+		}
+
+		err = tx.Create(&model.User{Email: s.Email, Password: hashPw, FullName: s.Fullname}).Error
 		if err != nil {
 			fmt.Println("user create is failed")
 			http.Error(res,"user create is failed",http.StatusBadRequest)
