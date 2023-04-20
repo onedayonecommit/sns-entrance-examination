@@ -9,3 +9,11 @@ func GenerateHashPw(pw string) (string,error){
 	}
 	return string(hashPw),nil
 } 
+
+func CompareHashPw(hashPw,pw string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashPw),[]byte(pw))
+	if err != nil{
+		return false
+	}
+	return true
+}
