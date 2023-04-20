@@ -9,12 +9,6 @@ import (
 	"github.com/onedayonecommit/sns/util"
 )
 
-type signupBody struct{
-	Email string `json:"email" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	Fullname string `json:"fullname" validate:"required"`
-}
-
 func SignupHandler(res http.ResponseWriter, req *http.Request){
 	if req.Method !="POST"{
 		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed) // 허가 되지 않은 요청방식은 반환
