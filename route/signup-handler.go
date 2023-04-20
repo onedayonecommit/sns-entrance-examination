@@ -25,8 +25,8 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 	pw := req.FormValue("password")
 	fullname:= req.FormValue("fullname")
 
-	checkStatus,_ := UserCheck(*&email)
-	if checkStatus{
+	err,_ = UserCheck(*&email)
+	if err != nil{
 		db:= mysql.ConnectDatabase()
 		tx := db.Begin()
 
