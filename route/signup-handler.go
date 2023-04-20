@@ -21,15 +21,17 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 		return
 	}
 
-	var s signupBody
-
-	err := reqBodyCheck(req,&s)
-
+	err:= req.ParseForm()
 	if err != nil{
-		http.Error(res,"request body is wrong",http.StatusBadRequest)
+		http.Error(res,"contentType is wrong",http.StatusBadRequest)
 		return
 	}
-	checkStatus,_ := UserCheck(s.Email)
+
+	email:= req.FormValue("email")
+	pw := req.FormValue("password")
+	fullname:= req.FormValue("fullname")
+
+	checkStatus,_ := UserCheck(*&email)
 	if checkStatus{
 		db:= mysql.ConnectDatabase()
 		tx := db.Begin()
@@ -41,14 +43,14 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 
-		hashPw,err := util.GenerateHashPw(s.Password)
+		hashPw,err := util.GenerateHashPw(*&pw)
 		if err != nil{
 			fmt.Println("password hashing failed")
 			http.Error(res,"password hasing is failed",http.StatusInternalServerError)
 			return
 		}
 
-		err = tx.Create(&model.User{Email: s.Email, Password: hashPw, FullName: s.Fullname}).Error
+		err = tx.Create(&model.User{Email: *&email, Password: hashPw, FullName: *&fullname}).Error
 		if err != nil {
 			fmt.Println("user create is failed")
 			http.Error(res,"user create is failed",http.StatusBadRequest)
@@ -58,7 +60,7 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 		
 		var hex,_ = util.GenerateHex(7)
 
-		err = tx.Create(&model.Wallet{Wallet_address: hex,UserId: s.Email}).Error
+		err = tx.Create(&model.Wallet{Wallet_address: hex,UserId: *&email}).Error
 		if err != nil{
 			fmt.Println("wallet address create is failed")
 			http.Error(res,"wallet create is failed",http.StatusBadRequest)
