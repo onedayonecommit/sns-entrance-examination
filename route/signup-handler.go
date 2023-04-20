@@ -17,7 +17,7 @@ type signupBody struct{
 
 func SignupHandler(res http.ResponseWriter, req *http.Request){
 	if req.Method !="POST"{
-		http.Error(res,"request method is wrong",http.StatusMethodNotAllowed) // 허가 되지 않은 요청방식은 반환
+		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed) // 허가 되지 않은 요청방식은 반환
 		return
 	}
 
