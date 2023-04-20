@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/onedayonecommit/sns/mysql"
 	"github.com/onedayonecommit/sns/route"
 )
@@ -16,11 +17,13 @@ func main(){
 	fmt.Println("db connect success")
 	close,_:= db.DB()
 	defer close.Close()
-	http.HandleFunc("/v1/user/register",route.SignupHandler)
-	http.HandleFunc("/v1/user/login",route.LoginHandler)
-	http.HandleFunc("/v1/wallets",route.GetAllWalletHandler)
+	router := mux.NewRouter()
+	router.HandleFunc("/v1/user/register",route.SignupHandler)
+	router.HandleFunc("/v1/user/login",route.LoginHandler)
+	router.HandleFunc("/v1/wallets",route.GetAllWalletHandler)
+	router.HandleFunc("/v1/wallet/balance/{ADDRESS}",route.GetBalanceHandler)
 	
-	err:= http.ListenAndServe(":3000",nil)
+	err:= http.ListenAndServe(":3000",router)
 	if err != nil{
 		log.Fatalln("server open failed")
 	}
