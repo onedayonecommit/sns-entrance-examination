@@ -1,7 +1,9 @@
 package route
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/onedayonecommit/sns/util"
 )
@@ -11,7 +13,7 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	err := req.ParseForm()
 	if err != nil{
 		http.Error(res,"content type is wrong",http.StatusBadRequest)
@@ -19,12 +21,25 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 	}
 	email:=req.FormValue("email")
 	password := req.FormValue("password")
-	checkStatus,hashPw := UserCheck(*&email)
-	if !checkStatus {
+	err,hashPw := UserCheck(*&email)
+	if err == nil {
 		result := util.CompareHashPw(hashPw,*&password)
 		if result {
 			// 성공시 Jwt 토큰 발급
-			res.WriteHeader(http.StatusOK)
+			token,err := util.GenerateJwt(UserWallet(email))
+			if err !=nil {
+				http.Error(res,"Generate token failed",http.StatusInternalServerError)
+			}
+			cookie := http.Cookie{
+				Name: "koa:sess",
+				Value: token,
+				Expires: time.Now().Add(time.Minute*15),
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+			}
+			http.SetCookie(res, &cookie)
+			fmt.Println(token)
+			fmt.Fprintln(res,"login successful")
 			return
 		}
 		http.Error(res,"Password do not match",http.StatusBadRequest)
