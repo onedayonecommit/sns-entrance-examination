@@ -6,18 +6,12 @@ import (
 	"github.com/onedayonecommit/sns/util"
 )
 
-type loginBody struct{
-	Email string `json:"email" validate:"required"`
-	Password string `json:"password" validate:"required"`
-}
-
 func LoginHandler(res http.ResponseWriter,req *http.Request){
 	if req.Method != "POST" {
 		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
 		return
 	}
-
-	// var l loginBody
+	
 	err := req.ParseForm()
 	if err != nil{
 		http.Error(res,"content type is wrong",http.StatusBadRequest)
