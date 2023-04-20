@@ -20,6 +20,7 @@ func GenerateJwt(address string) (string ,error){
 	tokenInfo  := jwt.MapClaims{
 		"address":address,
 		"exp":time.Now().Add(time.Minute * 15).Unix(), // Unix() == 초 단위로 변경 기준은 node.js랑 동일
+		"issuer" : "GyeongHwan",
 	}
 	token:= jwt.NewWithClaims(jwt.SigningMethodHS256,tokenInfo)
 	accessToken,err := token.SignedString([]byte(secretKey))
