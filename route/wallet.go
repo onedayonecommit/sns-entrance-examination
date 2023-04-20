@@ -5,8 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/onedayonecommit/sns/mysql"
+	"github.com/onedayonecommit/sns/mysql/model"
 )
+
+type CoinResult struct{
+	Coin string
+	Balance float64
+}
+
+type Response struct{
+	Address string
+	Coins []CoinResult
+}
 
 func GetAllWalletHandler(res http.ResponseWriter, req *http.Request){
 	if req.Method != "GET" {
@@ -32,5 +45,38 @@ func GetAllWalletHandler(res http.ResponseWriter, req *http.Request){
 	close,_ := db.DB()
 	defer close.Close()
 
+	return
+}
+
+func GetBalanceHandler(res http.ResponseWriter,req *http.Request){
+	if req.Method != "GET" {
+		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
+		return
+	}
+	var coin model.Coin
+
+	vars := mux.Vars(req)
+	address:= vars["ADDRESS"]
+
+	db:= mysql.ConnectDatabase()
+	close,_ := db.DB()
+	defer close.Close()
+
+	err := db.Select("BTC, ETH").Where("address = ? ",address).First(&coin).Error
+	fmt.Println(err)
+	if err != nil {
+		http.Error(res,"this wallet info is not found",http.StatusNotFound)
+		return
+	}
+
+	resResult := Response{
+		Address: address,
+		Coins: []CoinResult{
+			{Coin: "BTC", Balance: coin.BTC},
+			{Coin: "ETH", Balance: coin.ETH},
+		},
+	}
+	res.Header().Set("Content-Type","application/json")
+	json.NewEncoder(res).Encode(resResult)
 	return
 }
