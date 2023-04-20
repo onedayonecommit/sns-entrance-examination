@@ -17,7 +17,7 @@ func main(){
 	close,_:= db.DB()
 	defer close.Close()
 	http.HandleFunc("/v1/user/register",route.SignupHandler)
-	http.HandleFunc("/v1/user/login",route.SignupHandler)
+	http.HandleFunc("/v1/user/login",route.LoginHandler)
 	
 	err:= http.ListenAndServe(":3000",nil)
 	if err != nil{
