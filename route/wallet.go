@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/onedayonecommit/sns/mysql"
-	"github.com/onedayonecommit/sns/mysql/model"
 )
 
 func GetAllWalletHandler(res http.ResponseWriter, req *http.Request){
@@ -14,11 +13,14 @@ func GetAllWalletHandler(res http.ResponseWriter, req *http.Request){
 		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
 		return
 	}
-	var w model.Wallet
+	var w []struct{
+		Wallet_address string `json:"wallet_address"` // 한번에 여러개의 데이터를 받아야하므로 []
+	}
 	
 	db :=mysql.ConnectDatabase()
 	
-	err:= db.Where(&w)
+	err:= db.Table("wallets").Select("wallet_address").Find(&w).Error // wallets테이블에서 wallet_address 데이터만 모두 출력
+	fmt.Println(w)
 	if err != nil {
 		res.WriteHeader(http.StatusOK)
 		fmt.Fprintln(res,"There is no list of verified wallets.") // 지갑목록이 없으면

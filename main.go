@@ -18,6 +18,7 @@ func main(){
 	defer close.Close()
 	http.HandleFunc("/v1/user/register",route.SignupHandler)
 	http.HandleFunc("/v1/user/login",route.LoginHandler)
+	http.HandleFunc("/v1/wallets",route.GetAllWalletHandler)
 	
 	err:= http.ListenAndServe(":3000",nil)
 	if err != nil{
