@@ -1,6 +1,7 @@
 package route
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -12,12 +13,12 @@ import (
 
 type ReqAndCon struct {
 	Denom string
-	amount string
+	Amount int
 }
 
 type ExchangeResult struct{
-	request ReqAndCon
-	converted ReqAndCon
+	Request ReqAndCon
+	Converted ReqAndCon
 };
 
 func ExchangeHandler(res http.ResponseWriter, req *http.Request){
@@ -77,6 +78,13 @@ func ExchangeHandler(res http.ResponseWriter, req *http.Request){
 		}
 		
 		tx.Commit()
+		exChangeResult := ExchangeResult{
+			Request: ReqAndCon{Denom: "BTC",Amount: value},
+			Converted: ReqAndCon{Denom: "ETH",Amount: value*10},
+		}
+	
+		res.Header().Set("Content-Type","application/json")
+		json.NewEncoder(res).Encode(exChangeResult)
 		return
 	} else if fromToken == "ETH" && toToken =="BTC" {
 		tx := db.Begin()
@@ -106,7 +114,15 @@ func ExchangeHandler(res http.ResponseWriter, req *http.Request){
 		}
 		
 		tx.Commit()
+		exChangeResult := ExchangeResult{
+			Request: ReqAndCon{Denom: "ETH",Amount: value},
+			Converted: ReqAndCon{Denom: "BTC",Amount: value/10},
+		}
+	
+		res.Header().Set("Content-Type","application/json")
+		json.NewEncoder(res).Encode(exChangeResult)
 		return
 	}
+
 	return 
 }
