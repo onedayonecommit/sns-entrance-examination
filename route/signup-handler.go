@@ -78,6 +78,7 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 
+
 		res.WriteHeader(http.StatusOK)
 		fmt.Fprint(res,"signup successful")
 

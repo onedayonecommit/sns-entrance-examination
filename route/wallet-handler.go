@@ -13,7 +13,7 @@ import (
 
 type CoinResult struct{
 	Coin string
-	Balance float64
+	Balance uint
 }
 
 type Response struct{
