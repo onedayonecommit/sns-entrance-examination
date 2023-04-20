@@ -27,9 +27,10 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 
 	if err != nil{
 		http.Error(res,"request body is wrong",http.StatusBadRequest)
+		return
 	}
-
-	if UserCheck(s.Email){
+	checkStatus,_ := UserCheck(s.Email)
+	if checkStatus{
 		db:= mysql.ConnectDatabase()
 		tx := db.Begin()
 
