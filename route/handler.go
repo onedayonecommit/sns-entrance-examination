@@ -10,26 +10,27 @@ import (
 	"github.com/onedayonecommit/sns/mysql/model"
 )
 
-func UserCheck(userEmail string) bool {
+func UserCheck(userEmail string) (bool,string) {
 	fmt.Println(userEmail)
 	db := mysql.ConnectDatabase()
-	err:= db.Where("email = ? ",userEmail).First(&model.User{}).Error
+	var user model.User
+	err:= db.Where("email = ? ",userEmail).First(&user).Error
 	close,_ := db.DB()
 	defer close.Close()
 	if err != nil {
-		return true
+		return true,""
 	}
-	return false
+	return false,user.Password
 }
 
-func reqBodyCheck(req *http.Request,s *signupBody) error {
+func reqBodyCheck(req *http.Request,body interface{}) error {
 	data,err := ioutil.ReadAll(req.Body)
 
 	if err!= nil {
 		return err
 	}
 	
-	err = json.Unmarshal([]byte(data),&s)
+	err = json.Unmarshal([]byte(data),&body)
 	
 	if err != nil{
 		return err
