@@ -1,10 +1,7 @@
 package route
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 
 	"github.com/onedayonecommit/sns/mysql"
 	"github.com/onedayonecommit/sns/mysql/model"
@@ -25,18 +22,3 @@ func UserCheck(userEmail string) (bool,string) {
 }
 
 // 전달받은 요청값 검증 실패시 err 성공시 nil
-func reqBodyCheck(req *http.Request,body interface{}) error {
-	data,err := ioutil.ReadAll(req.Body)
-
-	if err!= nil {
-		return err
-	}
-	
-	err = json.Unmarshal([]byte(data),&body)
-	
-	if err != nil{
-		return err
-	}
-	return nil
-}
-
