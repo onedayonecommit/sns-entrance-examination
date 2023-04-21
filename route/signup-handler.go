@@ -52,7 +52,7 @@ func SignupHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 		
-		var hex,_ = util.GenerateHex(7)
+		var hex,_ = util.GenerateHex(8)
 
 		err = tx.Create(&model.Wallet{Wallet_address: hex,UserId: *&email}).Error
 		if err != nil{

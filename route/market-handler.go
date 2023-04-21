@@ -7,6 +7,7 @@ import (
 
 	"github.com/onedayonecommit/sns/mysql"
 	"github.com/onedayonecommit/sns/mysql/model"
+	"github.com/onedayonecommit/sns/util"
 	"gorm.io/gorm"
 )
 
@@ -32,12 +33,26 @@ func ExchangeHandler(res http.ResponseWriter, req *http.Request){
 	}
 
 	var coin model.Coin
-
-	address := req.FormValue("address") // 임시 방편
+	cookie,err := req.Cookie("koa:sess")
+	if err != nil{
+		if err == http.ErrNoCookie{
+			http.Error(res,"you don't have cookie",http.StatusBadRequest)
+			return
+		}
+	}
+	tokenValue := cookie.Value
+	address,err := util.VerifyJwt(tokenValue)
+	if err.Error() == "jwt is not found"{
+		http.Error(res,"jwt already exp, re login",http.StatusBadRequest)
+		return
+	} else if err != nil{
+		http.Error(res,"unknown Error",http.StatusInternalServerError)
+		return
+	}
+	// address := req.FormValue("address") // 임시 방편
 	fromToken := req.FormValue("fromToken")
 	toToken := req.FormValue("toToken")
 	amount := req.FormValue("amount")
-	
 
 	// 교환 POST 요청시 jwt에 담은 wallet address 토대로 변경
 	db := mysql.ConnectDatabase()
