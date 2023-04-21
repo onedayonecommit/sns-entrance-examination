@@ -46,6 +46,9 @@ func TransferHandler(res http.ResponseWriter, req *http.Request){
 	amount := req.FormValue("amount")
 	db := mysql.ConnectDatabase()
 	
+	close,_ := db.DB()
+	defer close.Close()
+	
 	value,err := strconv.Atoi(amount)
 	if err != nil {
 		http.Error(res,"amount is not number",http.StatusBadRequest)
@@ -66,20 +69,72 @@ func TransferHandler(res http.ResponseWriter, req *http.Request){
 
 	if token == "BTC" && coin.BTC >=uint(value) {
 		tx:= db.Begin()
-		err := tx.Model(&model.Coin{}).Where("address = ?",from).Update("BTC",gorm.Expr("BTC - ?",value)).Error
+		close,_ := db.DB()
+		defer close.Close()
+		
+		err := tx.Model(&model.Coin{}).Where("address = ?",from).Update("BTC",gorm.Expr("BTC - ?",uint(value))).Error
 		if err !=nil {
 			http.Error(res,"transfer service is failed",http.StatusInternalServerError)
 			tx.Rollback()
 			return
 		}
-		err = tx.Model(&model.Coin{}).Where("address = ?",to).Update("BTC",gorm.Expr("BTC + ?",amount)).Error
+		
+		err = tx.Model(&model.Coin{}).Where("address = ?",to).Update("BTC",gorm.Expr("BTC + ?",uint(value))).Error
 		if err != nil {
 			http.Error(res,"transfer service is failed",http.StatusInternalServerError)
 			tx.Rollback()
 			return
 		}
-	} else if token == "ETH" && coin.ETH >=uint(value) {
 		
-	}
+		err = tx.Create(&model.Transaction{To: to,From: from,Token: token,Amount: uint(value) }).Error
+		if err != nil {
+			http.Error(res,"transaction create failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
 
+		err = tx.Commit().Error
+		if err != nil {
+			http.Error(res,"transaction save failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
+		res.WriteHeader(http.StatusOK)
+		return
+	} else if token == "ETH" && coin.ETH >=uint(value) {
+		tx:= db.Begin()
+		close,_ := db.DB()
+		defer close.Close()
+		
+		err := tx.Model(&model.Coin{}).Where("address = ?",from).Update("ETH",gorm.Expr("ETH - ?",uint(value))).Error
+		if err !=nil {
+			http.Error(res,"transfer service is failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
+		
+		err = tx.Model(&model.Coin{}).Where("address = ?",to).Update("ETH",gorm.Expr("ETH + ?",uint(value))).Error
+		if err != nil {
+			http.Error(res,"transfer service is failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
+		
+		err = tx.Create(&model.Transaction{To: to,From: from,Token: token,Amount: uint(value) }).Error
+		if err != nil {
+			http.Error(res,"transaction create failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
+
+		err = tx.Commit().Error
+		if err != nil {
+			http.Error(res,"transaction save failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
+		res.WriteHeader(http.StatusOK)
+		return
+	}
+	return
 }
