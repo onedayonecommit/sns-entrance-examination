@@ -9,6 +9,7 @@ import (
 
 	"github.com/onedayonecommit/sns/mysql"
 	"github.com/onedayonecommit/sns/mysql/model"
+	"github.com/onedayonecommit/sns/util"
 )
 
 type CoinResult struct{
@@ -64,6 +65,51 @@ func GetBalanceHandler(res http.ResponseWriter,req *http.Request){
 
 	err := db.Select("BTC, ETH").Where("address = ? ",address).First(&coin).Error
 	fmt.Println(err)
+	if err != nil {
+		http.Error(res,"this wallet info is not found",http.StatusNotFound)
+		return
+	}
+
+	resResult := Response{
+		Address: address,
+		Coins: []CoinResult{
+			{Coin: "BTC", Balance: coin.BTC},
+			{Coin: "ETH", Balance: coin.ETH},
+		},
+	}
+	res.Header().Set("Content-Type","application/json")
+	json.NewEncoder(res).Encode(resResult)
+	return
+}
+
+func MyWalletBalance(res http.ResponseWriter, req *http.Request){
+	if req.Method != "GET"{
+		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
+		return
+	}
+
+	var coin model.Coin
+	cookie,err := req.Cookie("koa:sess")
+	if err!= nil {
+		http.Error(res,"cookie is not found",http.StatusBadRequest)
+		return
+	}
+	tokenValue:= cookie.Value
+	address,err:=util.VerifyJwt(tokenValue)
+
+	if err != nil && err.Error() == "jwt is not found" {
+		http.Error(res,"jwt is already exp",http.StatusBadRequest)
+		return
+	} else if err !=nil {
+		http.Error(res,"unknown err",http.StatusInternalServerError)
+		return
+	}
+
+	db := mysql.ConnectDatabase()
+	close,_ := db.DB()
+	defer close.Close()
+
+	err = db.Select("BTC, ETH").Where("address = ? ",address).First(&coin).Error
 	if err != nil {
 		http.Error(res,"this wallet info is not found",http.StatusNotFound)
 		return
