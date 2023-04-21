@@ -20,6 +20,7 @@ func main(){
 	router := mux.NewRouter()
 	router.HandleFunc("/v1/user/register",route.SignupHandler)
 	router.HandleFunc("/v1/user/login",route.LoginHandler)
+	router.HandleFunc("/v1/user/logout",route.LogOutHandler)
 	router.HandleFunc("/v1/wallets",route.GetAllWalletHandler)
 	router.HandleFunc("/v1/wallet/balance/{ADDRESS}",route.GetBalanceHandler)
 	router.HandleFunc("/v1/market/convert",route.ExchangeHandler)

@@ -30,13 +30,13 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 			if err !=nil {
 				http.Error(res,"Generate token failed",http.StatusInternalServerError)
 			}
-			cookie := http.Cookie{
+			cookie := &http.Cookie{
 				Name: "koa:sess",
 				Value: token,
 				Expires: time.Now().Add(time.Minute*15),
 				HttpOnly: true,
 			}
-			http.SetCookie(res, &cookie)
+			http.SetCookie(res, cookie)
 			fmt.Fprintln(res,"login successful",token)
 			return
 		}
@@ -45,30 +45,18 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 	}
 }
 
-// Login handler
-// func LoginHandler(res http.ResponseWriter,req *http.Request){
-// 	if req.Method != "POST" {
-// 		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
-// 		return
-// 	}
+func LogOutHandler(res http.ResponseWriter, req *http.Request){
+	if req.Method != "POST" {
+		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
+		return
+	}
 
-// 	var l loginBody
-
-// 	err := reqBodyCheck(req,&l)
-// 	if err != nil {
-// 		http.Error(res,"request body is wrong",http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	checkStatus,hashPw := UserCheck(l.Email)
-// 	if !checkStatus {
-// 		result := util.CompareHashPw(hashPw,l.Password)
-// 		if result {
-// 			// 성공시 Jwt 토큰 발급
-// 			res.WriteHeader(http.StatusOK)
-// 			return
-// 		}
-// 		http.Error(res,"Password do not match",http.StatusBadRequest)
-// 		return
-// 	}
-// }
+	cookie:= &http.Cookie{
+		Name: "koa:sess",
+		Value: "",
+		Expires: time.Unix(0,0),
+		HttpOnly: true,
+	}
+	http.SetCookie(res,cookie)
+	return
+}
