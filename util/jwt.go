@@ -1,6 +1,8 @@
 package util
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -28,4 +30,37 @@ func GenerateJwt(address string) (string ,error){
 		return "",err
 	}
 	return accessToken,nil
+}
+
+func VerifyJwt(tokenValue string) (string,error){
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalln("Env Load Failed")
+	}
+
+	if tokenValue == ""{
+		return "", errors.New("jwt is not found")
+	}
+
+	var secretKey = []byte(os.Getenv("SECRET_KEY"))
+
+	parsedToken,err := jwt.Parse(tokenValue,func(t *jwt.Token) (interface{}, error) {
+		if _,ok := t.Method.(*jwt.SigningMethodHMAC); !ok{ // gpt
+			return nil, fmt.Errorf("Unexpected signing method: %v", t.Header["alg"]) // gpt
+		}
+		return secretKey,nil
+	})
+	if err != nil {
+		return "",err
+	}
+
+	if claims, ok := parsedToken.Claims.(jwt.MapClaims); ok && parsedToken.Valid { // gpt
+		address,ok:=claims["address"].(string)
+		if !ok {
+			return "",errors.New("jwt parse failed")
+		}
+		return address,nil
+	} 
+	return "",nil
+
 }
