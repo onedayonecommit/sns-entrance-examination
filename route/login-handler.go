@@ -35,6 +35,8 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 				Value: token,
 				Expires: time.Now().Add(time.Minute*15),
 				HttpOnly: true,
+				Secure: false,
+				SameSite: http.SameSiteLaxMode,
 			}
 			http.SetCookie(res, cookie)
 			fmt.Fprintln(res,"login successful",token)
@@ -50,13 +52,15 @@ func LogOutHandler(res http.ResponseWriter, req *http.Request){
 		http.Error(res,"request method is not allowed",http.StatusMethodNotAllowed)
 		return
 	}
-
 	cookie:= &http.Cookie{
 		Name: "koa:sess",
 		Value: "",
 		Expires: time.Unix(0,0),
 		HttpOnly: true,
+		Secure: false,
+		SameSite: http.SameSiteLaxMode,
 	}
-	http.SetCookie(res,cookie)
+	http.SetCookie(res, cookie)
+	fmt.Fprintln(res,"logout")
 	return
 }
