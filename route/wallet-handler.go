@@ -45,8 +45,26 @@ func GetAllWalletHandler(res http.ResponseWriter, req *http.Request){
 		fmt.Fprintln(res,"There is no list of verified wallets.") // 지갑목록이 없으면
 		return 
 	}
+
+	walletMap:= make(map[string]Response)
+	for _,value := range coin{
+		address,torF := walletMap[value.Address]
+		if torF {
+			address.Coins = append(address.Coins,CoinResult{"eth",value.ETH})
+			address.Coins = append(address.Coins,CoinResult{"btc",value.BTC})
+			walletMap[value.Address] = address
+		}
+	}
+
+	wallet:= make([]Response,0,len(walletMap))
+	for _,value := range walletMap{
+		wallet = append(wallet, value)
+	}
+
+	Wallets := Wallets{wallets: wallet}
+
 	res.Header().Set("Content-Type","application/json")
-	json.NewEncoder(res).Encode("")
+	json.NewEncoder(res).Encode(Wallets)
 
 	close,_ := db.DB()
 	defer close.Close()
