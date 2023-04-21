@@ -35,11 +35,9 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 				Value: token,
 				Expires: time.Now().Add(time.Minute*15),
 				HttpOnly: true,
-				SameSite: http.SameSiteLaxMode,
 			}
 			http.SetCookie(res, &cookie)
-			fmt.Println(token)
-			fmt.Fprintln(res,"login successful")
+			fmt.Fprintln(res,"login successful",token)
 			return
 		}
 		http.Error(res,"Password do not match",http.StatusBadRequest)
