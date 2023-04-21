@@ -86,7 +86,7 @@ func TransferHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 		
-		err = tx.Create(&model.Transaction{To: to,From: from,Token: token,Amount: uint(value) }).Error
+		err = tx.Create(&model.Transaction{To: to,From: from,Coin: token,Amount: uint(value) }).Error
 		if err != nil {
 			http.Error(res,"transaction create failed",http.StatusInternalServerError)
 			tx.Rollback()
@@ -120,7 +120,7 @@ func TransferHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 		
-		err = tx.Create(&model.Transaction{To: to,From: from,Token: token,Amount: uint(value) }).Error
+		err = tx.Create(&model.Transaction{To: to,From: from,Coin: token,Amount: uint(value) }).Error
 		if err != nil {
 			http.Error(res,"transaction create failed",http.StatusInternalServerError)
 			tx.Rollback()
