@@ -97,7 +97,12 @@ func ExchangeHandler(res http.ResponseWriter, req *http.Request){
 			return
 		}
 		
-		tx.Commit()
+		err = tx.Commit().Error
+		if err != nil{
+			http.Error(res,"transaction failed",http.StatusInternalServerError)
+			tx.Rollback()
+			return
+		}
 		exChangeResult := ExchangeResult{
 			Request: ReqAndCon{Denom: "BTC",Amount: value},
 			Converted: ReqAndCon{Denom: "ETH",Amount: value*10},
