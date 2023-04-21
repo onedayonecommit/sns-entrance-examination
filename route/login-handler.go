@@ -37,6 +37,7 @@ func LoginHandler(res http.ResponseWriter,req *http.Request){
 				HttpOnly: true,
 				Secure: false,
 				SameSite: http.SameSiteLaxMode,
+				Path: "/",
 			}
 			http.SetCookie(res, cookie)
 			fmt.Fprintln(res,"login successful",token)
@@ -59,6 +60,7 @@ func LogOutHandler(res http.ResponseWriter, req *http.Request){
 		HttpOnly: true,
 		Secure: false,
 		SameSite: http.SameSiteLaxMode,
+		Path: "/",
 	}
 	http.SetCookie(res, cookie)
 	fmt.Fprintln(res,"logout")
